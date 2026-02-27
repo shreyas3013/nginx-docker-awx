@@ -1,0 +1,36 @@
+---
+- name: Run nginx using docker
+  hosts: localhost
+  become: true
+  connection: local
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start and enable docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Pull nginx image
+      docker_image:
+        name: nginx
+        tag: latest
+        source: pull
+
+    - name: Run nginx container
+      docker_container:
+        name: nginx
+        image: nginx:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
