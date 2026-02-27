@@ -1,10 +1,10 @@
-- name: Run nginx using docker (AWX safe)
-  hosts: localhost
-  connection: local
+---
+- name: Run nginx using docker
+  hosts: all
   become: true
 
   tasks:
-    - name: Update apt
+    - name: Update apt cache
       apt:
         update_cache: yes
 
@@ -19,8 +19,16 @@
         state: started
         enabled: true
 
-    - name: Remove existing nginx container (if any)
-      shell: docker rm -f nginx || true
+    - name: Pull nginx image
+      docker_image:
+        name: nginx
+        source: pull
 
     - name: Run nginx container
-      shell: docker run -d --name nginx -p 80:80 nginx
+      docker_container:
+        name: nginx
+        image: nginx:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "80:80"
